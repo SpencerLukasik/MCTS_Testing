@@ -43,6 +43,11 @@ void copy2DList(List origin, List copy) {
     }
 }
 
+class Boolean {
+  bool value;
+  Boolean(this.value);
+}
+
 void copyCombination(
     List<List<CoordinatePair>> origin, List<List<CoordinatePair>> copy) {
   copy.clear();

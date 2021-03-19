@@ -85,7 +85,7 @@ CoordinatePair MCTS_Move(List board, int numberOfSimulations, List combinations,
   var simPlayerValues =
       List.generate(width, (i) => List(width), growable: false);
   var simUntaken;
-  bool simCurPlayer;
+  Boolean simCurPlayer = new Boolean(curPlayer);
   List<List<CoordinatePair>> simCombinations = [];
   List<List<CoordinatePair>> simPlayerCombinations = [];
 
@@ -108,11 +108,10 @@ CoordinatePair MCTS_Move(List board, int numberOfSimulations, List combinations,
     copyCombination(playerCombinations, simPlayerCombinations);
 
     simUntaken = List.from(untaken);
-    simCurPlayer = curPlayer;
+    simCurPlayer.value = curPlayer;
     //Selection and Expansion of Node Tree
     start = SelectAndExpand(head, simUntaken, simBoard, simValues,
         simPlayerValues, simCombinations, simPlayerCombinations, simCurPlayer);
-
     //Simulate Game is Simulation
     //downPropegate after calling upPropegate
     upPropegate(
@@ -145,19 +144,6 @@ CoordinatePair MCTS_Move(List board, int numberOfSimulations, List combinations,
         head.children[i].uct.toString() +
         " and a score of " +
         head.children[i].score.toString());
-    print("Children:");
-    for (int k = 0; k < head.children[i].children.length; k++)
-      print("Node (" +
-          head.children[i].children[k].coordinates.y.toString() +
-          ", " +
-          head.children[i].children[k].coordinates.x.toString() +
-          "), was visited " +
-          head.children[i].children[k].visited.toString() +
-          " times, had a UCT value of " +
-          head.children[i].children[k].uct.toString() +
-          " and a score of " +
-          head.children[i].children[k].score.toString());
-    print("");
   }
   return temp.coordinates;
 }
@@ -170,11 +156,15 @@ int simulateGame(
     List playerValues,
     CoordinatePair randoMove,
     List untaken,
-    bool curPlayer) {
+    Boolean curPlayer) {
+  //Remember who was first to move; if it is the Human to move, we want the
+  //results to come back with the sign flipped
+  int buffer = 1;
+  if (curPlayer.value) buffer *= -1;
   //While there is space on the board,
   while (untaken.length > 0) {
     //If the current player is the human,
-    if (curPlayer) {
+    if (curPlayer.value) {
       //Set the board space to 1
       simBoard[randoMove.x][randoMove.y] = 1;
       //Remove combinations to keep up with the WinCheck
@@ -182,8 +172,8 @@ int simulateGame(
       values[randoMove.x][randoMove.y].thirdPriority = -1;
       playerValues[randoMove.x][randoMove.y].thirdPriority = -1;
       //If there is a win with this player, return -1
-      if (checkWin(simBoard, playerCombinations, curPlayer)) {
-        return -1;
+      if (checkWin(simBoard, playerCombinations, curPlayer.value)) {
+        return (-1 * buffer);
       }
     } else {
       simBoard[randoMove.x][randoMove.y] = 2;
@@ -192,8 +182,8 @@ int simulateGame(
       values[randoMove.x][randoMove.y].thirdPriority = -1;
       playerValues[randoMove.x][randoMove.y].thirdPriority = -1;
       //Return 1 for a positive outcome
-      if (checkWin(simBoard, combinations, curPlayer)) {
-        return 1;
+      if (checkWin(simBoard, combinations, curPlayer.value)) {
+        return (1 * buffer);
       }
     }
     //Remove the untaken space from the list so spaces are not repeated
@@ -207,7 +197,7 @@ int simulateGame(
     //Get another random untaken space
     if (untaken.length > 0)
       randoMove = untaken[Random().nextInt(untaken.length)];
-    curPlayer = !curPlayer;
+    curPlayer.value = !curPlayer.value;
   }
   //Return 0 if it's a catgame
   return 0;
@@ -221,9 +211,10 @@ Node SelectAndExpand(
     List simPlayerValues,
     List simCombinations,
     List simPlayerCombinations,
-    bool simCurPlayer) {
+    Boolean simCurPlayer) {
   //If there is a child node that has not yet been visited at all,
   if (head.children.length < untaken.length) {
+    //**EXPAND
     //Make the node (a bit hacky to use heads' children length as the index for
     //Untaken, keep sight of this for further issues)
     head.children.add(new Node(untaken[head.children.length], 0, 0, 0));
@@ -235,7 +226,7 @@ Node SelectAndExpand(
 
   //Otherwise, get the highest UCT node from the list.
   //Return head if there is no option
-  if (head.children.length == 0) return head;
+  if (untaken.length == 0) return head;
   Node temp = getHighestUCT(head.children);
   //Remove the node recieved from the list of untaken nodes
   for (int i = 0; i < untaken.length; i++)
@@ -244,23 +235,24 @@ Node SelectAndExpand(
       break;
     }
   //Update board state
-  if (simCurPlayer) {
+  if (simCurPlayer.value) {
     simBoard[temp.coordinates.x][temp.coordinates.y] = 1;
     //Check if there is already a win on this new board state
-    if (checkWin(simBoard, simPlayerCombinations, simCurPlayer)) return temp;
+    if (checkWin(simBoard, simPlayerCombinations, simCurPlayer.value))
+      return temp;
     removePotential(simCombinations, simValues, temp.coordinates);
     simValues[temp.coordinates.x][temp.coordinates.y].thirdPriority = -1;
     simPlayerValues[temp.coordinates.x][temp.coordinates.y].thirdPriority = -1;
   } else {
     simBoard[temp.coordinates.x][temp.coordinates.y] = 2;
     //Do the same if it is the AI's turn to move
-    if (checkWin(simBoard, simCombinations, simCurPlayer)) return temp;
+    if (checkWin(simBoard, simCombinations, simCurPlayer.value)) return temp;
     removePotential(simPlayerCombinations, simPlayerValues, temp.coordinates);
     simValues[temp.coordinates.x][temp.coordinates.y].thirdPriority = -1;
     simPlayerValues[temp.coordinates.x][temp.coordinates.y].thirdPriority = -1;
   }
   //Recursively call this function with the updated values
-  simCurPlayer = !simCurPlayer;
+  simCurPlayer.value = !simCurPlayer.value;
   return SelectAndExpand(temp, untaken, simBoard, simValues, simPlayerValues,
       simCombinations, simPlayerCombinations, simCurPlayer);
 }
@@ -270,7 +262,7 @@ void upPropegate(Node start, int simResult) {
   start.score += simResult;
 
   //Repeat if we are not at the head
-  if (start != start.parent) upPropegate(start.parent, simResult);
+  if (start != start.parent) upPropegate(start.parent, simResult * -1);
 }
 
 void downPropegate(Node start) {
