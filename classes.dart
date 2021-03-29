@@ -36,16 +36,22 @@ class Node {
       other.coordinates.y == coordinates.y);
 }
 
+class Boolean {
+  bool value;
+  Boolean(this.value);
+}
+
+class SQLNode {
+  String sequence;
+  int value;
+  int depth;
+}
+
 void copy2DList(List origin, List copy) {
   for (int i = 0; i < origin.length; i++)
     for (int j = 0; j < origin[i].length; j++) {
       copy[i][j] = origin[i][j];
     }
-}
-
-class Boolean {
-  bool value;
-  Boolean(this.value);
 }
 
 void copyCombination(
@@ -57,4 +63,12 @@ void copyCombination(
       copy[i][j] = origin[i][j];
     }
   }
+}
+
+void copyValue(List origin, List copy) {
+  for (int i = 0; i < origin.length; i++)
+    for (int j = 0; j < origin[i].length; j++) {
+      copy[i][j] = Value(origin[i][j].firstPriority,
+          origin[i][j].secondPriority, origin[i][j].thirdPriority);
+    }
 }

@@ -1,14 +1,15 @@
 import 'dart:io';
 import 'classes.dart';
-import 'currentMaterial.dart';
+import 'classicGame.dart';
+import 'basicFunctions.dart';
 import 'dart:math';
 
-const int width = 3;
-const int n = 3;
+const int width = 5;
+const int n = 4;
 
 void main() {
   const bool learning = true;
-  int numberOfSimulations = 1000;
+  int numberOfSimulations = 2000;
   bool curPlayer = true;
   var board = List.generate(width, (i) => List(width), growable: false);
 
@@ -47,28 +48,34 @@ void MCTS_GameLoop(
     int numberOfSimulations,
     bool curPlayer) {
   while (true) {
-    if (curPlayer) {
-      drawBoard(board);
-      print("X: ");
-      prevCoordinates.y = int.parse(stdin.readLineSync());
-      print("Y: ");
-      prevCoordinates.x = int.parse(stdin.readLineSync());
-      board[prevCoordinates.x][prevCoordinates.y] = 1;
-      if (checkWin(board, playerCombinations, curPlayer)) break;
-      curPlayer = !curPlayer;
-    } else {
+    while (true) {
       prevCoordinates = MCTS_Move(board, numberOfSimulations, combinations,
           playerCombinations, values, playerValues, curPlayer);
-      board[prevCoordinates.x][prevCoordinates.y] = 2;
-      if (checkWin(board, combinations, curPlayer)) break;
+      if (curPlayer) {
+        board[prevCoordinates.x][prevCoordinates.y] = 1;
+        if (checkWin(board, playerCombinations, curPlayer)) {
+          print("AI 1 Victory!");
+          break;
+        }
+      } else {
+        board[prevCoordinates.x][prevCoordinates.y] = 2;
+        if (checkWin(board, combinations, curPlayer)) {
+          print("AI 2 Victory!");
+          break;
+        }
+      }
+      if (fullBoard(board)) {
+        print("Tie!");
+        break;
+      }
       curPlayer = !curPlayer;
     }
+    combinations.clear();
+    playerCombinations.clear();
+    populate(combinations, values);
+    populate(playerCombinations, playerValues);
+    resetGame(board);
   }
-  drawBoard(board);
-  if (curPlayer)
-    print("Congratulations to the Human!");
-  else
-    print("Congratulations to the AI!");
 }
 
 CoordinatePair MCTS_Move(List board, int numberOfSimulations, List combinations,
@@ -99,7 +106,7 @@ CoordinatePair MCTS_Move(List board, int numberOfSimulations, List combinations,
 
   //Run simulations according to the number of simulations required
   for (int i = 1; i < numberOfSimulations + 1; i++) {
-    print("Simulation #" + i.toString() + "!");
+    //print("Simulation #" + i.toString() + "!");
     //Copy simulated values
     copy2DList(board, simBoard);
     copy2DList(values, simValues);
@@ -133,18 +140,18 @@ CoordinatePair MCTS_Move(List board, int numberOfSimulations, List combinations,
   for (int i = 0; i < head.children.length; i++) {
     if (head.children[i].visited > temp.visited) temp = head.children[i];
   }
-  for (int i = 0; i < head.children.length; i++) {
-    print("Node (" +
-        head.children[i].coordinates.y.toString() +
-        ", " +
-        head.children[i].coordinates.x.toString() +
-        "), was visited " +
-        head.children[i].visited.toString() +
-        " times, had a UCT value of " +
-        head.children[i].uct.toString() +
-        " and a score of " +
-        head.children[i].score.toString());
-  }
+  //for (int i = 0; i < head.children.length; i++) {
+  //  print("Node (" +
+  //      head.children[i].coordinates.y.toString() +
+  //      ", " +
+  //      head.children[i].coordinates.x.toString() +
+  //     "), was visited " +
+  //      head.children[i].visited.toString() +
+  //      " times, had a UCT value of " +
+  //      head.children[i].uct.toString() +
+  //      " and a score of " +
+  //      head.children[i].score.toString());
+  //}
   return temp.coordinates;
 }
 
@@ -286,78 +293,72 @@ Node getHighestUCT(List nodes) {
   return nodes[index];
 }
 
-bool checkWin(List board, List combinations, bool curPlayer) {
-  bool winDetected;
-  for (int i = 0; i < combinations.length; i++) {
-    winDetected = true;
-    for (int j = 0; j < combinations[i].length; j++) {
-      if (curPlayer) {
-        if (board[combinations[i][j].x][combinations[i][j].y] != 1) {
-          winDetected = false;
-          break;
-        }
-      } else {
-        if (board[combinations[i][j].x][combinations[i][j].y] != 2) {
-          winDetected = false;
-          break;
-        }
-      }
-    }
-    if (winDetected) return true;
-  }
+CoordinatePair AI_Move(
+    List board,
+    List<List<CoordinatePair>> combinations,
+    List values,
+    List<List<CoordinatePair>> playerCombinations,
+    List playerValues,
+    bool curPlayer) {
+  CoordinatePair aiGuessDimensions = CoordinatePair(0, 0);
 
-  return false;
-}
+  Value curPotential = new Value(0, 0, 0);
+  Value playerCurPotential = new Value(0, 0, 0);
 
-void resetGame(List board) {
+  //if (winExists(board, combinations, playerCombinations, values, playerValues,
+  //    curPlayer, aiGuessDimensions)) {
+  //  print("Blood in the water!");
+  //  return aiGuessDimensions;
+  //}
+
+  //updateValues(board, combinations, values, curPlayer);
+  //Potential of Aggressive moves
   for (int i = 0; i < width; i++)
     for (int j = 0; j < width; j++) {
-      board[i][j] = 0;
+      //Check to make sure spot is not taken
+      if (values[j][i].thirdPriority > -1 && values[j][i] > curPotential) {
+        //If first priority is higher, OR if first priority is the same AND second
+        //priority is higher, OR if first AND second priorities are the same but THIRD
+        //priority is higher, make this the preferred move
+        curPotential = values[j][i];
+        aiGuessDimensions = CoordinatePair(j, i);
+      }
     }
-}
+  //print("Greatest AI value: " +
+  //    curPotential.firstPriority.toString() +
+  //    ", " +
+  //    curPotential.secondPriority.toString() +
+  //    ", " +
+  //    curPotential.thirdPriority.toString() +
+  //    " at " +
+  //    aiGuessDimensions.x.toString() +
+  //    ", " +
+  //    aiGuessDimensions.y.toString());
 
-void drawBoard(List board) {
-  stdout.write("   ");
-  for (int i = 0; i < width; i++) stdout.write("  " + i.toString() + " ");
-  print("");
-
-  stdout.write("   ");
-  for (int i = 0; i < width; i++) stdout.write("----");
-  print("");
-
-  for (int i = 0; i < width; i++) {
-    stdout.write(i.toString() + "  ");
+  //Defensive moves
+  //updateValues(board, playerCombinations, playerValues, curPlayer);
+  for (int i = 0; i < width; i++)
     for (int j = 0; j < width; j++) {
-      if (board[i][j] == 1)
-        stdout.write("| o ");
-      else if (board[i][j] == 2)
-        stdout.write("| x ");
-      else
-        stdout.write("|   ");
+      if (playerValues[j][i].thirdPriority > -1 &&
+          playerValues[j][i] > playerCurPotential) {
+        playerCurPotential = playerValues[j][i];
+        if (playerCurPotential > curPotential)
+          aiGuessDimensions = CoordinatePair(j, i);
+      }
     }
-    stdout.write("|");
-    print("");
-
-    //Bottom of each line
-    stdout.write("   ");
-    for (int j = 0; j < width; j++) stdout.write("----");
-    print("");
-  }
-}
-
-void populate_paths(File paths) {
-  String s = "";
-  for (int i = 0; i < width; i++) {
-    for (int j = 0; j < width; j++) {
-      s += "0 0 ";
-      if (j < 10) s += "0";
-      s += j.toString();
-      s += "-";
-      if (i < 10) s += "0";
-      s += i.toString();
-      s += '/\n';
-      paths.writeAsStringSync(s, mode: FileMode.append);
-      s = "";
-    }
-  }
+  //print("Aggressive:");
+  //drawPotential(values);
+  //print("Defensive:");
+  //drawPotential(playerValues);
+  //print("Greatest Player value: " +
+  //    playerCurPotential.firstPriority.toString() +
+  //    ", " +
+  //    playerCurPotential.secondPriority.toString() +
+  //    ", " +
+  //    playerCurPotential.thirdPriority.toString() +
+  //    ", final move:  " +
+  //    aiGuessDimensions.y.toString() +
+  //    ", " +
+  //    aiGuessDimensions.x.toString());
+  return aiGuessDimensions;
 }
