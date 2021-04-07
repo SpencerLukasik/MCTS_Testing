@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'classes.dart';
-import 'classicGame.dart';
-import 'MCTS.dart';
+import 'Main.dart';
+import 'ValueFunctions.dart';
 
 bool checkWin(List board, List combinations, bool curPlayer) {
   bool winDetected;

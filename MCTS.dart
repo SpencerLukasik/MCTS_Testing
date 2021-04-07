@@ -1,44 +1,49 @@
-import 'dart:io';
 import 'classes.dart';
-import 'classicGame.dart';
-import 'basicFunctions.dart';
+import 'BasicFunctions.dart';
+import 'ValueFunctions.dart';
+import 'Main.dart';
 import 'dart:math';
+import 'dart:io';
 
-const int width = 9;
-const int n = 5;
+void MCTS_GameLoop(
+    List board,
+    List values,
+    List playerValues,
+    List combinations,
+    List playerCombinations,
+    CoordinatePair prevCoordinates,
+    int numberOfSimulations,
+    bool curPlayer) {
+  while (true) {
+    if (curPlayer) {
+      drawBoard(board);
+      print("X: ");
+      prevCoordinates.y = int.parse(stdin.readLineSync());
+      print("Y: ");
+      prevCoordinates.x = int.parse(stdin.readLineSync());
 
-void main() {
-  const bool learning = false;
-  bool curPlayer = true;
-  var board = List.generate(width, (i) => List(width), growable: false);
-
-  CoordinatePair prevCoordinates = new CoordinatePair(-1, -1);
-  var values = List.generate(width, (i) => List(width), growable: false);
-  var playerValues = List.generate(width, (i) => List(width), growable: false);
-  List<List<CoordinatePair>> combinations = [];
-  List<List<CoordinatePair>> playerCombinations = [];
-
-  for (int i = 0; i < width; i++)
-    for (int j = 0; j < width; j++) {
-      board[i][j] = 0;
+      make_move(board, combinations, playerCombinations, values, playerValues,
+          curPlayer, prevCoordinates);
+      if (checkWin(board, playerCombinations, curPlayer)) break;
+      curPlayer = !curPlayer;
+    } else {
+      prevCoordinates = MCTS_Move(board, combinations, values,
+          playerCombinations, playerValues, curPlayer);
+      make_move(board, combinations, playerCombinations, values, playerValues,
+          curPlayer, prevCoordinates);
+      if (checkWin(board, combinations, curPlayer)) break;
+      curPlayer = !curPlayer;
     }
-
-  populate(combinations, values);
-  populate(playerCombinations, playerValues);
-
-  if (learning) {
-    var blackPaths = File('blackPaths.txt');
-    var whitePaths = File('whitePaths.txt');
-    MCTS_Move(board, combinations, playerCombinations, values, playerValues,
-        curPlayer);
-  } else {
-    GameLoop(board, values, playerValues, combinations, playerCombinations,
-        prevCoordinates, curPlayer);
   }
+  drawBoard(board);
+  if (curPlayer)
+    print("Congratulations to the Human!");
+  else
+    print("Congratulations to the AI!");
 }
 
-void MCTS_Move(List board, List combinations, List playerCombinations,
-    List values, List playerValues, bool curPlayer) {
+CoordinatePair MCTS_Move(List board, List combinations, List values,
+    List playerCombinations, List playerValues, bool curPlayer) {
   //Define the starting node.  Set it's parent to itself so that we can verify
   //later on whether or not the node we are currently on is the head
   //(if node == node.parent) //this is the head
@@ -64,8 +69,8 @@ void MCTS_Move(List board, List combinations, List playerCombinations,
   }
 
   //Run simulations according to the number of simulations required
-  while (true) {
-    //print("Simulation #" + i.toString() + "!");
+  for (int i = 1; i < numberOfSimulations + 1; i++) {
+    print("Simulation #" + i.toString() + "!");
     //Copy simulated values
     copy2DList(board, simBoard);
     copy2DList(values, simValues);
@@ -93,6 +98,26 @@ void MCTS_Move(List board, List combinations, List playerCombinations,
             simCurPlayer));
     downPropegate(head);
   }
+  //Prints out final values.  Commend out if you don't want to see them
+  for (int i = 0; i < head.children.length; i++) {
+    print("Child (" +
+        head.children[i].coordinates.y.toString() +
+        ", " +
+        head.children[i].coordinates.x.toString() +
+        ") was visited " +
+        head.children[i].visited.toString() +
+        " times, had a score of " +
+        head.children[i].score.toString() +
+        ", and had a uct of " +
+        head.children[i].uct.toString());
+  }
+
+  //Get the highest scoring node and return it back to main
+  int highest = 0;
+  for (int i = 0; i < head.children.length; i++) {
+    if (head.children[i].visited > head.children[highest].visited) highest = i;
+  }
+  return head.children[highest].coordinates;
 }
 
 int simulateGame(
@@ -120,7 +145,6 @@ int simulateGame(
       playerValues[randoMove.x][randoMove.y].thirdPriority = -1;
       //If there is a win with this player, return -1
       if (checkWin(simBoard, playerCombinations, curPlayer.value)) {
-        print("White Victory!");
         return (-1 * buffer);
       }
     } else {
@@ -131,7 +155,6 @@ int simulateGame(
       playerValues[randoMove.x][randoMove.y].thirdPriority = -1;
       //Return 1 for a positive outcome
       if (checkWin(simBoard, combinations, curPlayer.value)) {
-        print("Black Victory!");
         return (1 * buffer);
       }
     }
@@ -149,7 +172,6 @@ int simulateGame(
     curPlayer.value = !curPlayer.value;
   }
   //Return 0 if it's a catgame
-  print("It's a tie!");
   return 0;
 }
 

@@ -1,7 +1,7 @@
-import 'classes.dart';
-import 'classicGame.dart';
-import 'MCTS.dart';
-import 'basicFunctions.dart';
+import '../classes.dart';
+import '../BasicFunctions.dart';
+import '../ValueFunctions.dart';
+import '../Main.dart';
 
 bool amIThreateningOrAmIBeingThreatened(
     List board,
@@ -29,18 +29,18 @@ bool amIThreateningOrAmIBeingThreatened(
   if (canIWin(simBoard, simCombinations, simPlayerCombinations, simValues,
       simPlayerValues, curPlayer, false)) {
     print("I can win!");
-    drawBoard(simBoard);
     for (int i = 0; i < width; i++)
       for (int j = 0; j < width; j++) {
         //Find the winning move
-        copy2DList(board, simBoard);
-        copyValue(values, simValues);
-        copyValue(playerValues, simPlayerValues);
-        copyCombination(combinations, simCombinations);
-        copyCombination(playerCombinations, simPlayerCombinations);
-        make_move(simBoard, simCombinations, simPlayerCombinations, simValues,
-            simPlayerValues, curPlayer, CoordinatePair(j, i));
-        if (values[j][i] > Value(2, 0, 0)) {
+        if (values[j][i].firstPriority >= (n - 2) &&
+            values[j][i].thirdPriority > -1) {
+          copy2DList(board, simBoard);
+          copyValue(values, simValues);
+          copyValue(playerValues, simPlayerValues);
+          copyCombination(combinations, simCombinations);
+          copyCombination(playerCombinations, simPlayerCombinations);
+          make_move(simBoard, simCombinations, simPlayerCombinations, simValues,
+              simPlayerValues, curPlayer, CoordinatePair(j, i));
           if (!canMyOpponentWin(
               simBoard,
               simCombinations,
@@ -49,6 +49,7 @@ bool amIThreateningOrAmIBeingThreatened(
               simPlayerValues,
               !curPlayer,
               true)) {
+            print("Returning " + j.toString() + ", " + i.toString());
             aiGuessDimensions.x = j;
             aiGuessDimensions.y = i;
             return true;
@@ -111,19 +112,20 @@ bool canIWin(
   updateValues(board, combinations, values, curPlayer);
   updateValues(board, playerCombinations, playerValues, curPlayer);
   bool detector = false;
+  //drawBoard(board);
 
   //win detected
   for (int i = 0; i < width; i++)
     for (int j = 0; j < width; j++)
       if (values[j][i].firstPriority >= n) {
-        //print("CanIWin Won and returned true!");
+        print("CanIWin Won and returned true!");
         return true;
       }
 
   for (int i = 0; i < width; i++)
     for (int j = 0; j < width; j++)
       if (playerValues[j][i].firstPriority >= n) {
-        //print("CanIWin lost and returned false");
+        print("CanIWin lost and returned false");
         return false;
       }
 
@@ -131,7 +133,7 @@ bool canIWin(
     for (int j = 0; j < width; j++)
       if (values[j][i].firstPriority >= (n - 1) &&
           values[j][i].thirdPriority > -1) {
-        // print("CanIWin Won and returned true!");
+        print("CanIWin Won and returned true!");
 
         return true;
       }
@@ -156,7 +158,7 @@ bool canIWin(
         copyCombination(playerCombinations, simPlayerCombinations);
         make_move(simBoard, simCombinations, simPlayerCombinations, simValues,
             simPlayerValues, curPlayer, CoordinatePair(j, i));
-        //print("CanIWin wants to know if the Opponent can NOT win in 1 move");
+        print("CanIWin wants to know if the Opponent can NOT win in 1 move");
         if (!canMyOpponentWin(simBoard, simCombinations, simPlayerCombinations,
             simValues, simPlayerValues, !curPlayer, false)) {
           detector = true;
@@ -166,8 +168,8 @@ bool canIWin(
       }
     }
   if (setter && !detector) {
-    //print(
-    //    "CanIWin could not find a line where the opponent did not win in 1. return false");
+    print(
+        "CanIWin could not find a line where the opponent did not win in 1. return false");
     return false;
   }
 
@@ -183,10 +185,10 @@ bool canIWin(
         copyCombination(playerCombinations, simPlayerCombinations);
         make_move(simBoard, simCombinations, simPlayerCombinations, simValues,
             simPlayerValues, curPlayer, CoordinatePair(j, i));
-        //print("CanIWin wants to know if the Opponent can NOT block 1 move");
+        print("CanIWin wants to know if the Opponent can NOT block 1 move");
         if (!canMyOpponentWin(simBoard, simCombinations, simPlayerCombinations,
             simValues, simPlayerValues, !curPlayer, true)) {
-          //print("CanIWin found a win in 1 move! returning true");
+          print("CanIWin found a win in 1 move! returning true");
           return true;
         }
       }
@@ -216,14 +218,14 @@ bool canIWin(
       }
     }
   if (setter && !detector) {
-    //print(
-    //    "CanIWin could not find a line where the opponent did not win in 2. returning false");
+    print(
+        "CanIWin could not find a line where the opponent did not win in 2. returning false");
     return false;
   }
-  //if (def)
-  //  print("CanIWin fizzled and is returning true");
-  //else
-  //  print("CanIWin fizzled and is returning false");
+  if (def)
+    print("CanIWin fizzled and is returning true");
+  else
+    print("CanIWin fizzled and is returning false");
   return def;
 }
 
@@ -238,18 +240,19 @@ bool canMyOpponentWin(
   updateValues(board, combinations, values, curPlayer);
   updateValues(board, playerCombinations, playerValues, curPlayer);
   bool detector = false;
+  //drawBoard(board);
   //win detected
   for (int i = 0; i < width; i++)
     for (int j = 0; j < width; j++)
       if (playerValues[j][i].firstPriority >= n) {
-        //    print("CanMyOpponentWin won and returned true!");
+        print("CanMyOpponentWin won and returned true!");
         return true;
       }
 
   for (int i = 0; i < width; i++)
     for (int j = 0; j < width; j++)
       if (values[j][i].firstPriority >= n) {
-        //  print("CanMyOpponentWin lost and returned false!");
+        print("CanMyOpponentWin lost and returned false!");
         return false;
       }
 
@@ -257,7 +260,7 @@ bool canMyOpponentWin(
     for (int j = 0; j < width; j++) {
       if (playerValues[j][i].firstPriority >= (n - 1) &&
           playerValues[j][i].thirdPriority > -1) {
-        //print("CanMyOpponentWin won and returned true!");
+        print("CanMyOpponentWin won and returned true!");
         return true;
       }
     }
@@ -283,19 +286,17 @@ bool canMyOpponentWin(
         copyCombination(playerCombinations, simPlayerCombinations);
         make_move(simBoard, simCombinations, simPlayerCombinations, simValues,
             simPlayerValues, curPlayer, CoordinatePair(j, i));
-        //print(
-        //    "CanMyOpponentWin wants to know if CanIWin can NOT win in 1 move");
+        print(
+            "CanMyOpponentWin wants to know if CanIWin can NOT win in 1 move");
         if (!canIWin(simBoard, simCombinations, simPlayerCombinations,
             simValues, simPlayerValues, !curPlayer, false)) {
           detector = true;
-          i = width;
-          j = width;
         }
       }
     }
   if (setter && !detector) {
-    //print(
-    //    "CanMyOpponentWin did not find a line where CanIWin didn't win in 1 move, return false");
+    print(
+        "CanMyOpponentWin did not find a line where CanIWin didn't win in 1 move, return false");
     return false;
   }
 
@@ -311,10 +312,10 @@ bool canMyOpponentWin(
         copyCombination(playerCombinations, simPlayerCombinations);
         make_move(simBoard, simCombinations, simPlayerCombinations, simValues,
             simPlayerValues, curPlayer, CoordinatePair(j, i));
-        //print("CanMyOpponentWin wants to know if CanIWin can block in 2 moves");
+        print("CanMyOpponentWin wants to know if CanIWin can block in 2 moves");
         if (!canIWin(simBoard, simCombinations, simPlayerCombinations,
             simValues, simPlayerValues, !curPlayer, true)) {
-          //print("CanMyOpponentWin says we can win in 2 moves! return true");
+          print("CanMyOpponentWin says we can win in 2 moves! return true");
           return true;
         }
       }
@@ -334,24 +335,23 @@ bool canMyOpponentWin(
         copyCombination(playerCombinations, simPlayerCombinations);
         make_move(simBoard, simCombinations, simPlayerCombinations, simValues,
             simPlayerValues, curPlayer, CoordinatePair(j, i));
-        //print(
-        //    "CanMyOpponentWin wants to know if CanIwin can NOT win in 2 moves");
+        print(
+            "CanMyOpponentWin wants to know if CanIwin can NOT win in 2 moves");
         if (!canIWin(simBoard, simCombinations, simPlayerCombinations,
             simValues, simPlayerValues, !curPlayer, false)) {
           detector = true;
-          i = width;
-          j = width;
         }
       }
     }
   if (setter && !detector) {
-    //print(
-    //    "CanMyOpponentWin did not find a line where CanIWin didn't win in 2 moves. return false");
+    print(
+        "CanMyOpponentWin did not find a line where CanIWin didn't win in 2 moves. return false");
     return false;
   }
-//  if (def)
-//    print("CanMyOpponentWin fizzled and is returning true");
-//  else
-//    print("CanMyOpponentWin fizzled and is returning false");
+  if (def)
+    print("CanMyOpponentWin fizzled and is returning true");
+  else
+    print("CanMyOpponentWin fizzled and is returning false");
+
   return def;
 }

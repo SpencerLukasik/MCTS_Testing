@@ -1,14 +1,14 @@
-import 'dart:io';
-import 'classes.dart';
-import 'classicGame.dart';
-import 'basicFunctions.dart';
+import '../classes.dart';
+import '../ClassicGame.dart';
+import '../BasicFunctions.dart';
+import '../ValueFunctions.dart';
 import 'dart:math';
 
 const int width = 5;
 const int n = 4;
 
 void main() {
-  const bool learning = true;
+  const bool playAgainstMCTS = true;
   int numberOfSimulations = 2000;
   bool curPlayer = true;
   var board = List.generate(width, (i) => List(width), growable: false);
@@ -27,7 +27,7 @@ void main() {
   populate(combinations, values);
   populate(playerCombinations, playerValues);
 
-  if (learning) {
+  if (playAgainstMCTS) {
     MCTS_GameLoop(board, values, playerValues, combinations, playerCombinations,
         prevCoordinates, numberOfSimulations, curPlayer);
     //populate_paths(blackPaths);
@@ -46,37 +46,7 @@ void MCTS_GameLoop(
     List playerCombinations,
     CoordinatePair prevCoordinates,
     int numberOfSimulations,
-    bool curPlayer) {
-  while (true) {
-    while (true) {
-      prevCoordinates = MCTS_Move(board, numberOfSimulations, combinations,
-          playerCombinations, values, playerValues, curPlayer);
-      if (curPlayer) {
-        board[prevCoordinates.x][prevCoordinates.y] = 1;
-        if (checkWin(board, playerCombinations, curPlayer)) {
-          print("AI 1 Victory!");
-          break;
-        }
-      } else {
-        board[prevCoordinates.x][prevCoordinates.y] = 2;
-        if (checkWin(board, combinations, curPlayer)) {
-          print("AI 2 Victory!");
-          break;
-        }
-      }
-      if (fullBoard(board)) {
-        print("Tie!");
-        break;
-      }
-      curPlayer = !curPlayer;
-    }
-    combinations.clear();
-    playerCombinations.clear();
-    populate(combinations, values);
-    populate(playerCombinations, playerValues);
-    resetGame(board);
-  }
-}
+    bool curPlayer) {}
 
 CoordinatePair MCTS_Move(List board, int numberOfSimulations, List combinations,
     List playerCombinations, List values, List playerValues, bool curPlayer) {
@@ -294,6 +264,76 @@ Node getHighestUCT(List nodes) {
 }
 
 CoordinatePair AI_Move(
+    List board,
+    List<List<CoordinatePair>> combinations,
+    List values,
+    List<List<CoordinatePair>> playerCombinations,
+    List playerValues,
+    bool curPlayer) {
+  CoordinatePair aiGuessDimensions = CoordinatePair(0, 0);
+
+  Value curPotential = new Value(0, 0, 0);
+  Value playerCurPotential = new Value(0, 0, 0);
+
+  //if (winExists(board, combinations, playerCombinations, values, playerValues,
+  //    curPlayer, aiGuessDimensions)) {
+  //  print("Blood in the water!");
+  //  return aiGuessDimensions;
+  //}
+
+  //updateValues(board, combinations, values, curPlayer);
+  //Potential of Aggressive moves
+  for (int i = 0; i < width; i++)
+    for (int j = 0; j < width; j++) {
+      //Check to make sure spot is not taken
+      if (values[j][i].thirdPriority > -1 && values[j][i] > curPotential) {
+        //If first priority is higher, OR if first priority is the same AND second
+        //priority is higher, OR if first AND second priorities are the same but THIRD
+        //priority is higher, make this the preferred move
+        curPotential = values[j][i];
+        aiGuessDimensions = CoordinatePair(j, i);
+      }
+    }
+  //print("Greatest AI value: " +
+  //    curPotential.firstPriority.toString() +
+  //    ", " +
+  //    curPotential.secondPriority.toString() +
+  //    ", " +
+  //    curPotential.thirdPriority.toString() +
+  //    " at " +
+  //    aiGuessDimensions.x.toString() +
+  //    ", " +
+  //    aiGuessDimensions.y.toString());
+
+  //Defensive moves
+  //updateValues(board, playerCombinations, playerValues, curPlayer);
+  for (int i = 0; i < width; i++)
+    for (int j = 0; j < width; j++) {
+      if (playerValues[j][i].thirdPriority > -1 &&
+          playerValues[j][i] > playerCurPotential) {
+        playerCurPotential = playerValues[j][i];
+        if (playerCurPotential > curPotential)
+          aiGuessDimensions = CoordinatePair(j, i);
+      }
+    }
+  //print("Aggressive:");
+  //drawPotential(values);
+  //print("Defensive:");
+  //drawPotential(playerValues);
+  //print("Greatest Player value: " +
+  //    playerCurPotential.firstPriority.toString() +
+  //    ", " +
+  //    playerCurPotential.secondPriority.toString() +
+  //    ", " +
+  //    playerCurPotential.thirdPriority.toString() +
+  //    ", final move:  " +
+  //    aiGuessDimensions.y.toString() +
+  //    ", " +
+  //    aiGuessDimensions.x.toString());
+  return aiGuessDimensions;
+}
+
+CoordinatePair AI_Move2(
     List board,
     List<List<CoordinatePair>> combinations,
     List values,
