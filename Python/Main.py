@@ -3,6 +3,7 @@ import Globals as g
 import BasicFunctions as func
 import MCTS
 import ValueFunctions as vfunc
+import GetBestMove as trial
 
 #Variables for maintaining boardstate
 curPlayer = True
