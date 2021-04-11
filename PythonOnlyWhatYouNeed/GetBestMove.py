@@ -1,8 +1,28 @@
 #Takes in a 2D array of integers and outputs a Coordinate Pair (x, y) that it believes is the best move to make
-
 import Globals as g
 import Classes as c
-import ValueFunctions as vfunc
+import Functions as func
+import MCTS as MCTS
+
+#Runs a Monty-Carlo search using the moves it finds off of getBestMovesInAnArray
+#A Little slow, but accurate
+def getMCTS_Move(board):
+    #Variables
+    combinations = []
+    playerCombinations = []
+    values = [[0 for i in range(g.width)] for j in range(g.width)]
+    playerValues = [[0 for i in range(g.width)] for j in range(g.width)]
+    #Populate
+    func.populate(combinations, values)
+    func.populate(playerCombinations, playerValues)
+    #Correct according to the current boardstate 
+    RePopulate(board, values, playerValues, combinations, playerCombinations)
+    #Update the new values
+    func.updateValues(board, combinations, values, True)
+    func.updateValues(board, playerCombinations, playerValues, True)
+
+    return MCTS.MCTS_Move(board, combinations, values, playerCombinations, playerValues, False)
+
 
 #Compares the values of all agressive and defensive moves, and returns the highest summation of both strategies.
 #This is much better for getting the best general move, but it can get confused in complex boardstates, as it does
@@ -15,20 +35,20 @@ def getBestMove(board):
     values = [[0 for i in range(g.width)] for j in range(g.width)]
     playerValues = [[0 for i in range(g.width)] for j in range(g.width)]
     #Populate
-    vfunc.populate(combinations, values)
-    vfunc.populate(playerCombinations, playerValues)
+    func.populate(combinations, values)
+    func.populate(playerCombinations, playerValues)
     #Correct according to the current boardstate
     RePopulate(board, values, playerValues, combinations, playerCombinations)
     #Update the new values
-    vfunc.updateValues(board, combinations, values, True)
-    vfunc.updateValues(board, playerCombinations, playerValues, True)
+    func.updateValues(board, combinations, values, True)
+    func.updateValues(board, playerCombinations, playerValues, True)
 
     aiGuessDimensions = c.CoordinatePair(0, 0)
     curPotential = c.Value(0, 0, 0)
     for i in range(g.width):
         for j in range(g.width):
       #Takes the Aggregate Potential of both player's possible moves
-            if (values[j][i].thirdPriority > -1 and playerValues[j][i].thirdPriority > -1 and (values[i][j]+playerValues[j][i]) > curPotential):
+            if (values[j][i].thirdPriority > -1 and playerValues[j][i].thirdPriority > -1 and (values[j][i]+playerValues[j][i]) > curPotential):
                 curPotential.firstPriority = values[j][i].firstPriority + playerValues[j][i].firstPriority
                 curPotential.secondPriority = values[j][i].secondPriority + playerValues[j][i].secondPriority
                 curPotential.thirdPriority = values[j][i].thirdPriority + playerValues[j][i].thirdPriority
@@ -47,13 +67,13 @@ def getBestAggressiveOrDefensiveMove(board):
     values = [[0 for i in range(g.width)] for j in range(g.width)]
     playerValues = [[0 for i in range(g.width)] for j in range(g.width)]
     #Populate
-    vfunc.populate(combinations, values)
-    vfunc.populate(playerCombinations, playerValues)
+    func.populate(combinations, values)
+    func.populate(playerCombinations, playerValues)
     #Correct according to the current boardstate
     RePopulate(board, values, playerValues, combinations, playerCombinations)
     #Update the new values
-    vfunc.updateValues(board, combinations, values, True)
-    vfunc.updateValues(board, playerCombinations, playerValues, True)
+    func.updateValues(board, combinations, values, True)
+    func.updateValues(board, playerCombinations, playerValues, True)
 
     aiGuessDimensions = c.CoordinatePair(0, 0)
     curPotential = c.Value(0, 0, 0)
@@ -81,20 +101,8 @@ def getBestAggressiveOrDefensiveMove(board):
 
     return aiGuessDimensions
 
-
-def RePopulate(board, values, playerValues, combinations, playerCombinations):
-    for i in range(len(board)):
-        for j in range(len(board[i])):
-            if (board[i][j]==1):
-                vfunc.removePotential(combinations, values, c.CoordinatePair(i, j))
-                values[i][j].thirdPriority = -1
-                playerValues[i][j].thirdPriority = -1
-            elif (board[i][j]==2):
-                vfunc.removePotential(playerCombinations, playerValues, c.CoordinatePair(i, j))
-                values[i][j].thirdPriority = -1
-                playerValues[i][j].thirdPriority = -1
-
 #This function returns an array of CoordinatePairs that could all be potential moves
+#Gets all moves of equivalent first and second priorities
 def getBestMovesInAnArray(board):
     #Variables
     combinations = []
@@ -102,13 +110,13 @@ def getBestMovesInAnArray(board):
     values = [[0 for i in range(g.width)] for j in range(g.width)]
     playerValues = [[0 for i in range(g.width)] for j in range(g.width)]
     #Populate
-    vfunc.populate(combinations, values)
-    vfunc.populate(playerCombinations, playerValues)
+    func.populate(combinations, values)
+    func.populate(playerCombinations, playerValues)
     #Correct according to the current boardstate 
     RePopulate(board, values, playerValues, combinations, playerCombinations)
     #Update the new values
-    vfunc.updateValues(board, combinations, values, True)
-    vfunc.updateValues(board, playerCombinations, playerValues, True)
+    func.updateValues(board, combinations, values, True)
+    func.updateValues(board, playerCombinations, playerValues, True)
 
     possibleMoves = []
 
@@ -162,68 +170,112 @@ def getBestMovesInAnArray(board):
 
     return possibleMoves
 
+#Does the same as the previous, but doesn't have to re-copy the combinations and values
+#Only useful for the MCTS_Searching
+#Don't touch this
+def getBestMovesInAnArrayFast(board, values, playerValues, combinations, playerCombinations):
+    func.updateValues(board, combinations, values, True)
+    func.updateValues(board, playerCombinations, playerValues, True)
+
+    possibleMoves = []
+
+    highestFirstAggressive = 0
+    highestSecondAggressive = 0
+    highestFirstDefensive = 0
+    highestSecondDefensive = 0
+
+    for i in range(g.width):
+        for j in range(g.width):
+      #Make sure the move is not taken
+            if (values[j][i].thirdPriority > -1):
+        #Get the highest first priority
+                if (values[j][i].firstPriority > highestFirstAggressive):
+                    highestFirstAggressive = values[j][i].firstPriority  
+
+                if (playerValues[j][i].firstPriority > highestFirstDefensive):
+                    highestFirstDefensive = playerValues[j][i].firstPriority
+            
+    for i in range(g.width):
+        for j in range(g.width):
+      #Make sure the move is not taken
+            if (values[j][i].thirdPriority > -1):
+        #Get the highest second priority based on the first
+                if (values[j][i].firstPriority == highestFirstAggressive and values[j][i].secondPriority > highestSecondAggressive):
+                   highestSecondAggressive = values[j][i].secondPriority
+        
+                if (playerValues[j][i].firstPriority == highestFirstDefensive and playerValues[j][i].secondPriority > highestSecondDefensive):
+                    highestSecondDefensive = playerValues[j][i].secondPriority
+       
+    #Compare the highest values calculated
+    #If the AI has a greater aggressive potential, make the most aggressive move
+    if (highestFirstAggressive == (g.n - 1)):
+        print("Highest Aggressive is 4!")
+        addToList(possibleMoves, values, highestFirstAggressive, highestSecondAggressive)
+    elif (highestFirstDefensive == (g.n - 1)):
+        print("Highest Defensive is 4!")
+        addToList(possibleMoves, playerValues, highestFirstDefensive, highestSecondDefensive)
+    elif (highestFirstAggressive == (g.n - 2)):
+        print("Highest Aggressive is 3!")
+        addToList(possibleMoves, values, highestFirstAggressive, highestSecondAggressive)
+    elif (highestFirstDefensive == (g.n - 2)):
+        print("Highest Defensive is 3!")
+        addToList(possibleMoves, playerValues, highestFirstDefensive, highestSecondDefensive)
+    else:
+        print("Value move!")
+        highestFirstTotal = 0
+        highestSecondTotal = 0
+        #First total
+        for i in range(g.width):
+            for j in range(g.width):
+                if (values[j][i].thirdPriority > -1):
+                    if (values[j][i].firstPriority + playerValues[j][i].firstPriority > highestFirstTotal):
+                        highestFirstTotal = values[j][i].firstPriority + playerValues[j][i].firstPriority
+        #Second total
+        for i in range(g.width):
+            for j in range(g.width):
+                if (values[j][i].thirdPriority > -1):
+                    if (values[j][i].firstPriority + playerValues[j][i].firstPriority == highestFirstTotal and values[j][i].secondPriority + playerValues[j][i].secondPriority > highestSecondTotal):
+                        highestSecondTotal = values[j][i].secondPriority + playerValues[j][i].secondPriority
+        #Append
+        for i in range(g.width):
+            for j in range(g.width):
+                if (values[j][i].thirdPriority > -1):
+                    if (values[j][i].firstPriority + playerValues[j][i].firstPriority == highestFirstTotal and values[j][i].secondPriority + playerValues[j][i].secondPriority >= highestSecondTotal):
+                        possibleMoves.append(c.CoordinatePair(j, i))
+        print(f"Highest first total was {highestFirstTotal}")
+        print(f"Highest second total was {highestSecondTotal}")
+        print(f"The array size is {len(possibleMoves)}")
+        if (len(possibleMoves) == 0):
+            func.drawPotential(values)
+            func.drawPotential(values)
+
+
+    return possibleMoves
+
+#Fixes combinations and values based on the given board
+#Don't touch this
+def RePopulate(board, values, playerValues, combinations, playerCombinations):
+    for i in range(len(board)):
+        for j in range(len(board[i])):
+            if (board[i][j]==1):
+                func.removePotential(combinations, values, c.CoordinatePair(i, j))
+                values[i][j].thirdPriority = -1
+                playerValues[i][j].thirdPriority = -1
+            elif (board[i][j]==2):
+                func.removePotential(playerCombinations, playerValues, c.CoordinatePair(i, j))
+                values[i][j].thirdPriority = -1
+                playerValues[i][j].thirdPriority = -1
 
 #Adds values to the list that are of the highest First priority AND that are 1 away from the highest Second priority
+#Don't touch this
 def addToList(possibleMoves, values, highestFirst, highestSecond):
     for i in range(g.width):
         for j in range(g.width):
             if (values[j][i].thirdPriority > -1):
                 if (values[j][i].firstPriority == highestFirst and values[j][i].secondPriority >= (highestSecond)):
                     possibleMoves.append(c.CoordinatePair(j, i))
-
-def getBestMovesInAnArrayFast(board, values, playerValues, combinations, playerCombinations):
-    #Variables
-    vfunc.updateValues(board, combinations, values, True)
-    vfunc.updateValues(board, playerCombinations, playerValues, True)
-
-    possibleMoves = []
-
-    highestFirstAggressive = 0
-    highestSecondAggressive = 0
-    highestFirstDefensive = 0
-    highestSecondDefensive = 0
-
-    for i in range(g.width):
-        for j in range(g.width):
-      #Make sure the move is not taken
-            if (values[j][i].thirdPriority > -1):
-        #Get the highest first and second priority aggressive moves
-                if (values[j][i].firstPriority > highestFirstAggressive):
-                    highestFirstAggressive = values[j][i].firstPriority
-                    if (values[j][i].secondPriority > highestSecondAggressive):
-                        highestSecondAggressive = values[j][i].secondPriority;
-        
-            if (playerValues[j][i].thirdPriority > -1):
-                if (playerValues[j][i].firstPriority > highestFirstDefensive):
-                    highestFirstDefensive = playerValues[j][i].firstPriority
-                    if (playerValues[j][i].secondPriority > highestSecondDefensive):
-                        highestSecondDefensive = playerValues[j][i].secondPriority
-       
-    #Compare the highest values calculated
-    #If the AI has a greater aggressive potential, make the most aggressive move
-    if (highestFirstAggressive == (g.n - 1)):
-        addToList(possibleMoves, values, highestFirstAggressive, highestSecondAggressive)
-    elif (highestFirstDefensive == (g.n - 1)):
-        addToList(possibleMoves, playerValues, highestFirstDefensive, highestSecondDefensive)
-    elif (highestFirstAggressive == (g.n - 2)):
-        addToList(possibleMoves, values, highestFirstAggressive, highestSecondAggressive)
-    elif (highestFirstDefensive == (g.n - 2)):
-        addToList(possibleMoves, playerValues, highestFirstDefensive, highestSecondDefensive)
-    else:
-        highestFirstTotal = 0
-        highestSecondTotal = 0
-        for i in range(g.width):
-            for j in range(g.width):
-                if (values[j][i].thirdPriority > -1):
-                    if (values[j][i].firstPriority + playerValues[j][i].firstPriority > highestFirstTotal):
-                        highestFirstTotal = values[j][i].firstPriority + playerValues[j][i].firstPriority
-                        if (values[j][i].secondPriority + playerValues[j][i].secondPriority > highestSecondTotal):
-                            highestSecondTotal = values[j][i].secondPriority + playerValues[j][i].secondPriority
-
-        for i in range(g.width):
-            for j in range(g.width):
-                if (values[j][i].thirdPriority > -1):
-                    if (values[j][i].firstPriority + playerValues[j][i].firstPriority == highestFirstTotal and values[j][i].secondPriority + playerValues[j][i].secondPriority >= highestSecondTotal):
-                        possibleMoves.append(c.CoordinatePair(j, i))
-
-    return possibleMoves
+    print(f"Highest first total was {highestFirst}")
+    print(f"Highest second total was {highestSecond}")
+    print(f"The array size is {len(possibleMoves)}")
+    if (len(possibleMoves) == 0):
+        func.drawPotential(values)

@@ -1,8 +1,6 @@
 import Classes as c
 import Globals as g
-import BasicFunctions as func
-import MCTS
-import ValueFunctions as vfunc
+import Functions as func
 import GetBestMove as trial
 import random
 
@@ -31,13 +29,9 @@ def GameLoop(board, values, playerValues, combinations, playerCombinations, prev
         #If it's the AI's turn
         else:
             #MCTS move
-            if (g.playAgainstMCTS):
-                prevCoordinates = MCTS.MCTS_Move(board, combinations, values, playerCombinations, playerValues, curPlayer)
-            #Value-based move
-            else:
-                prevCoordinates = trial.getBestMove(board)
-
             
+            prevCoordinates = trial.getMCTS_Move(board)
+
             func.make_move(board, combinations, playerCombinations, values, playerValues, curPlayer, prevCoordinates)
             if (func.checkWin(board, combinations, curPlayer)):
                 break
@@ -49,28 +43,6 @@ def GameLoop(board, values, playerValues, combinations, playerCombinations, prev
     else:
         print("Congratulations to the AI!")
 
-
-def AI_Move(board, combinations, values, playerCombinations, playerValues, curPlayer):
-    
-    aiGuessDimensions = c.CoordinatePair(0, 0)
-    curPotential = c.Value(0, 0, 0)
-
-    vfunc.updateValues(board, combinations, values, curPlayer)
-    vfunc.updateValues(board, playerCombinations, playerValues, curPlayer)
-
-    #Potential of Aggressive moves
-    for i in range(g.width):
-        for j in range(g.width):
-      #Check to make sure spot is not taken
-            if (values[j][i].thirdPriority > -1 and playerValues[j][i].thirdPriority > -1 and (values[i][j]+playerValues[i][j]) > curPotential):
-                curPotential.firstPriority = values[j][i].firstPriority + playerValues[j][i].firstPriority
-                curPotential.secondPriority = values[j][i].secondPriority + playerValues[j][i].secondPriority
-                curPotential.thirdPriority = values[j][i].thirdPriority + playerValues[j][i].thirdPriority
-                aiGuessDimensions = c.CoordinatePair(j, i)
-
-    return aiGuessDimensions
-
-
-vfunc.populate(combinations, values)
-vfunc.populate(playerCombinations, playerValues)
+func.populate(combinations, values)
+func.populate(playerCombinations, playerValues)
 GameLoop(board, values, playerValues, combinations, playerCombinations, prevCoordinates, curPlayer)

@@ -2,7 +2,6 @@ import math
 import random
 import Globals as g
 import Classes as c
-import GetBestMove as trial
 import BasicFunctions as func
 import ValueFunctions as vfunc
 
@@ -40,7 +39,9 @@ def MCTS_Move(board, combinations, values, playerCombinations, playerValues, cur
         vfunc.copyCombination(combinations, simCombinations)
         vfunc.copyCombination(playerCombinations, simPlayerCombinations)
         simCurPlayer.value = curPlayer
-        simUntaken = trial.getBestMovesInAnArrayFast(simBoard, simValues, simPlayerValues, simCombinations, simPlayerCombinations)
+        simUntaken = []
+        for i in range(len(untaken)):
+            simUntaken.append(untaken[i])
         #Selection and Expansion of Node Tree
         start = SelectAndExpand(head, simUntaken, simBoard, simValues, simPlayerValues, simCombinations, simPlayerCombinations, simCurPlayer)
         #Simulate Game is Simulation
@@ -70,8 +71,6 @@ def simulateGame(simBoard, combinations, playerCombinations, values, playerValue
         buff *= -1
     #While there is space on the board,
     while (len(simUntaken) > 0):
-        #func.drawBoard(simBoard)
-        #input()
         #If the current player is the human,
         if (curPlayer.value):
             #Set the board space to 1
@@ -100,15 +99,12 @@ def simulateGame(simBoard, combinations, playerCombinations, values, playerValue
     #Remove the untaken space from the list so spaces are not repeated
     #**This could be improved if we make RandoMove an index of untaken rather
     #**than a Coordinate Pair itself, but it does look ugly
-        curPlayer.value = not curPlayer.value
-        if (curPlayer.value):
-            simUntaken = trial.getBestMovesInAnArrayFast(simBoard, playerValues, values, playerCombinations, combinations)
-        else:
-            simUntaken = trial.getBestMovesInAnArrayFast(simBoard, values, playerValues, combinations, playerCombinations)
+        simUntaken.remove(randoMove)
 
     #Get another random untaken space
         if (len(simUntaken) > 0):
             randoMove = random.choice(simUntaken)
+        curPlayer.value = not curPlayer.value
 
     #Return 0 if it's a catgame
     #print("This was a tie")

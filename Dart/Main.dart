@@ -7,7 +7,7 @@ import 'MCTS.dart';
 const int width = 3;
 const int n = 3;
 const int numberOfSimulations = 1000;
-const bool playAgainstMCTS = true;
+const bool playAgainstMCTS = false;
 
 void main() {
   //Current player; true is human

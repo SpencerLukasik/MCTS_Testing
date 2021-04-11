@@ -3,8 +3,7 @@ import random
 import Globals as g
 import Classes as c
 import GetBestMove as trial
-import BasicFunctions as func
-import ValueFunctions as vfunc
+import Functions as func
 
 def MCTS_Move(board, combinations, values, playerCombinations, playerValues, curPlayer):
     #Define the starting node.  Set it's parent to itself so that we can verify
@@ -30,15 +29,15 @@ def MCTS_Move(board, combinations, values, playerCombinations, playerValues, cur
 
     #Run simulations according to the number of simulations required
     for i in range(g.numberOfSimulations):
-        print(f"Simulation #{i}!")
+        #print(f"Simulation #{i}!")
         #Copy simulated values
-        vfunc.copy2DList(board, simBoard)
-        vfunc.copy2DValue(values, simValues)
-        vfunc.copy2DValue(playerValues, simPlayerValues)
+        func.copy2DList(board, simBoard)
+        func.copy2DValue(values, simValues)
+        func.copy2DValue(playerValues, simPlayerValues)
         simCombinations = []
         simPlayerCombinations = []
-        vfunc.copyCombination(combinations, simCombinations)
-        vfunc.copyCombination(playerCombinations, simPlayerCombinations)
+        func.copyCombination(combinations, simCombinations)
+        func.copyCombination(playerCombinations, simPlayerCombinations)
         simCurPlayer.value = curPlayer
         simUntaken = trial.getBestMovesInAnArrayFast(simBoard, simValues, simPlayerValues, simCombinations, simPlayerCombinations)
         #Selection and Expansion of Node Tree
@@ -49,8 +48,8 @@ def MCTS_Move(board, combinations, values, playerCombinations, playerValues, cur
         downPropegate(head)
 
     #Prints out final values.  Commend out if you don't want to see them
-    for i in range(len(head.children)):
-        print(f"Child ({head.children[i].coordinates.y}, {head.children[i].coordinates.x}) was visited {head.children[i].visited} times, had a score of {head.children[i].score} and had a uct of {head.children[i].uct}")
+    #for i in range(len(head.children)):
+        #print(f"Child ({head.children[i].coordinates.y}, {head.children[i].coordinates.x}) was visited {head.children[i].visited} times, had a score of {head.children[i].score} and had a uct of {head.children[i].uct}")
   
    
     #Get the highest scoring node and return it back to main
@@ -70,31 +69,31 @@ def simulateGame(simBoard, combinations, playerCombinations, values, playerValue
         buff *= -1
     #While there is space on the board,
     while (len(simUntaken) > 0):
-        #func.drawBoard(simBoard)
-        #input()
+        func.drawBoard(simBoard)
+        input()
         #If the current player is the human,
         if (curPlayer.value):
             #Set the board space to 1
             simBoard[randoMove.x][randoMove.y] = 1
             #Remove combinations to keep up with the WinCheck
-            vfunc.removePotential(combinations, values, randoMove)
+            func.removePotential(combinations, values, randoMove)
             values[randoMove.x][randoMove.y].thirdPriority = -1
             playerValues[randoMove.x][randoMove.y].thirdPriority = -1
             #If there is a win with this player, return -1
             if (func.checkWin(simBoard, playerCombinations, curPlayer.value)):
-                #print("This was a loss")
-                #func.drawBoard(simBoard)
+                print("This was a loss")
+                func.drawBoard(simBoard)
                 return (-1 * buff)
         else:
             simBoard[randoMove.x][randoMove.y] = 2
             #Do the same if it is the AI's turn to move
-            vfunc.removePotential(playerCombinations, playerValues, randoMove)
+            func.removePotential(playerCombinations, playerValues, randoMove)
             values[randoMove.x][randoMove.y].thirdPriority = -1
             playerValues[randoMove.x][randoMove.y].thirdPriority = -1
             #Return 1 for a positive outcome
             if (func.checkWin(simBoard, combinations, curPlayer.value)):
-                #print("This was a win")
-                #func.drawBoard(simBoard)
+                print("This was a win")
+                func.drawBoard(simBoard)
                 return (1 * buff)
 
     #Remove the untaken space from the list so spaces are not repeated
@@ -111,8 +110,8 @@ def simulateGame(simBoard, combinations, playerCombinations, values, playerValue
             randoMove = random.choice(simUntaken)
 
     #Return 0 if it's a catgame
-    #print("This was a tie")
-    #func.drawBoard(simBoard)
+    print("This was a tie")
+    func.drawBoard(simBoard)
     return 0
 
 
@@ -145,7 +144,7 @@ def SelectAndExpand(head, untaken, simBoard, simValues, simPlayerValues, simComb
         #Check if there is already a win on this new board state
         if (func.checkWin(simBoard, simPlayerCombinations, simCurPlayer.value)):
             return temp
-        vfunc.removePotential(simCombinations, simValues, temp.coordinates)
+        func.removePotential(simCombinations, simValues, temp.coordinates)
         simValues[temp.coordinates.x][temp.coordinates.y].thirdPriority = -1
         simPlayerValues[temp.coordinates.x][temp.coordinates.y].thirdPriority = -1
     else:
@@ -153,7 +152,7 @@ def SelectAndExpand(head, untaken, simBoard, simValues, simPlayerValues, simComb
         #Do the same if it is the AI's turn to move
         if (func.checkWin(simBoard, simCombinations, simCurPlayer.value)):
             return temp
-        vfunc.removePotential(simPlayerCombinations, simPlayerValues, temp.coordinates)
+        func.removePotential(simPlayerCombinations, simPlayerValues, temp.coordinates)
         simValues[temp.coordinates.x][temp.coordinates.y].thirdPriority = -1
         simPlayerValues[temp.coordinates.x][temp.coordinates.y].thirdPriority = -1
 
