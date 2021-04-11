@@ -148,3 +148,37 @@ def copy2DValue(origin, copy):
   for i in range(len(origin)):
     for j in range(len(origin[i])):
         copy[i][j] = c.Value(origin[i][j].firstPriority, origin[i][j].secondPriority, origin[i][j].thirdPriority)
+def drawBoard(board):
+    print("   ", end='')
+    for i in range(g.width):
+        print(" ", end='')
+        if (i < 10):
+            print(" ", end='')
+        print(f"{i} ", end='')
+    
+    print("")
+    print("   ", end='')
+    for i in range(g.width):
+        print("----", end='')
+    print("")
+
+    for i in range(g.width):
+        print(f"{i} ", end='')
+        if (i < 10):
+            print(" ", end='')
+        for j in range(g.width):
+            if (board[i][j] == 1):
+                print("| o ", end='')
+            elif (board[i][j] == 2):
+                print("| x ", end='')
+            else:
+                print("|   ", end='')
+    
+        print("|", end='')
+        print("")
+
+        #Bottom of each line
+        print("   ", end='')
+        for j in range(g.width):
+            print("----", end='')
+        print("")

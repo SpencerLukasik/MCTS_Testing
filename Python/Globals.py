@@ -1,5 +1,5 @@
 #Variables to alter game
-width = 10
+width = 19
 n = 5
 numberOfSimulations = 100
 playAgainstMCTS = True

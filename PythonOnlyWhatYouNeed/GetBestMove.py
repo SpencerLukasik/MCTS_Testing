@@ -209,19 +209,14 @@ def getBestMovesInAnArrayFast(board, values, playerValues, combinations, playerC
     #Compare the highest values calculated
     #If the AI has a greater aggressive potential, make the most aggressive move
     if (highestFirstAggressive == (g.n - 1)):
-        print("Highest Aggressive is 4!")
         addToList(possibleMoves, values, highestFirstAggressive, highestSecondAggressive)
     elif (highestFirstDefensive == (g.n - 1)):
-        print("Highest Defensive is 4!")
         addToList(possibleMoves, playerValues, highestFirstDefensive, highestSecondDefensive)
     elif (highestFirstAggressive == (g.n - 2)):
-        print("Highest Aggressive is 3!")
         addToList(possibleMoves, values, highestFirstAggressive, highestSecondAggressive)
     elif (highestFirstDefensive == (g.n - 2)):
-        print("Highest Defensive is 3!")
         addToList(possibleMoves, playerValues, highestFirstDefensive, highestSecondDefensive)
     else:
-        print("Value move!")
         highestFirstTotal = 0
         highestSecondTotal = 0
         #First total
@@ -242,13 +237,6 @@ def getBestMovesInAnArrayFast(board, values, playerValues, combinations, playerC
                 if (values[j][i].thirdPriority > -1):
                     if (values[j][i].firstPriority + playerValues[j][i].firstPriority == highestFirstTotal and values[j][i].secondPriority + playerValues[j][i].secondPriority >= highestSecondTotal):
                         possibleMoves.append(c.CoordinatePair(j, i))
-        print(f"Highest first total was {highestFirstTotal}")
-        print(f"Highest second total was {highestSecondTotal}")
-        print(f"The array size is {len(possibleMoves)}")
-        if (len(possibleMoves) == 0):
-            func.drawPotential(values)
-            func.drawPotential(values)
-
 
     return possibleMoves
 
@@ -274,8 +262,3 @@ def addToList(possibleMoves, values, highestFirst, highestSecond):
             if (values[j][i].thirdPriority > -1):
                 if (values[j][i].firstPriority == highestFirst and values[j][i].secondPriority >= (highestSecond)):
                     possibleMoves.append(c.CoordinatePair(j, i))
-    print(f"Highest first total was {highestFirst}")
-    print(f"Highest second total was {highestSecond}")
-    print(f"The array size is {len(possibleMoves)}")
-    if (len(possibleMoves) == 0):
-        func.drawPotential(values)
