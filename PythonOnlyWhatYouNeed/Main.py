@@ -5,7 +5,7 @@ import GetBestMove as trial
 import random
 
 #Variables for maintaining boardstate
-curPlayer = False
+curPlayer = True
 board = [[0 for i in range(g.width)] for j in range(g.width)]
 values = [[0 for i in range(g.width)] for j in range(g.width)]
 playerValues = [[0 for i in range(g.width)] for j in range(g.width)]
