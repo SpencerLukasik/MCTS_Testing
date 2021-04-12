@@ -129,17 +129,23 @@ def getBestMovesInAnArray(board):
         for j in range(g.width):
       #Make sure the move is not taken
             if (values[j][i].thirdPriority > -1):
-        #Get the highest first and second priority aggressive moves
+        #Get the highest first priority
                 if (values[j][i].firstPriority > highestFirstAggressive):
-                    highestFirstAggressive = values[j][i].firstPriority
-                    if (values[j][i].secondPriority > highestSecondAggressive):
-                        highestSecondAggressive = values[j][i].secondPriority;
-        
-            if (playerValues[j][i].thirdPriority > -1):
+                    highestFirstAggressive = values[j][i].firstPriority  
+
                 if (playerValues[j][i].firstPriority > highestFirstDefensive):
                     highestFirstDefensive = playerValues[j][i].firstPriority
-                    if (playerValues[j][i].secondPriority > highestSecondDefensive):
-                        highestSecondDefensive = playerValues[j][i].secondPriority
+            
+    for i in range(g.width):
+        for j in range(g.width):
+      #Make sure the move is not taken
+            if (values[j][i].thirdPriority > -1):
+        #Get the highest second priority based on the first
+                if (values[j][i].firstPriority == highestFirstAggressive and values[j][i].secondPriority > highestSecondAggressive):
+                   highestSecondAggressive = values[j][i].secondPriority
+        
+                if (playerValues[j][i].firstPriority == highestFirstDefensive and playerValues[j][i].secondPriority > highestSecondDefensive):
+                    highestSecondDefensive = playerValues[j][i].secondPriority
        
     #Compare the highest values calculated
     #If the AI has a greater aggressive potential, make the most aggressive move
@@ -154,14 +160,19 @@ def getBestMovesInAnArray(board):
     else:
         highestFirstTotal = 0
         highestSecondTotal = 0
+        #First total
         for i in range(g.width):
             for j in range(g.width):
                 if (values[j][i].thirdPriority > -1):
                     if (values[j][i].firstPriority + playerValues[j][i].firstPriority > highestFirstTotal):
                         highestFirstTotal = values[j][i].firstPriority + playerValues[j][i].firstPriority
-                        if (values[j][i].secondPriority + playerValues[j][i].secondPriority > highestSecondTotal):
-                            highestSecondTotal = values[j][i].secondPriority + playerValues[j][i].secondPriority
-
+        #Second total
+        for i in range(g.width):
+            for j in range(g.width):
+                if (values[j][i].thirdPriority > -1):
+                    if (values[j][i].firstPriority + playerValues[j][i].firstPriority == highestFirstTotal and values[j][i].secondPriority + playerValues[j][i].secondPriority > highestSecondTotal):
+                        highestSecondTotal = values[j][i].secondPriority + playerValues[j][i].secondPriority
+        #Append
         for i in range(g.width):
             for j in range(g.width):
                 if (values[j][i].thirdPriority > -1):

@@ -5,7 +5,7 @@ import GetBestMove as trial
 import random
 
 #Variables for maintaining boardstate
-curPlayer = True
+curPlayer = False
 board = [[0 for i in range(g.width)] for j in range(g.width)]
 values = [[0 for i in range(g.width)] for j in range(g.width)]
 playerValues = [[0 for i in range(g.width)] for j in range(g.width)]
@@ -30,7 +30,7 @@ def GameLoop(board, values, playerValues, combinations, playerCombinations, prev
         else:
             #MCTS move
             
-            prevCoordinates = trial.getMCTS_Move(board)
+            prevCoordinates = random.choice(trial.getBestMovesInAnArray(board))
 
             func.make_move(board, combinations, playerCombinations, values, playerValues, curPlayer, prevCoordinates)
             if (func.checkWin(board, combinations, curPlayer)):
