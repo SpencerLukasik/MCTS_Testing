@@ -1,4 +1,4 @@
 #Variables to alter game
-width = 15
+width = 11
 n = 5
-numberOfSimulations = 200
+numberOfSimulations = 100

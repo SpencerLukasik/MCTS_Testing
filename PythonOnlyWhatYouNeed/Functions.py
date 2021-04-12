@@ -19,6 +19,13 @@ def checkWin(board, combinations, curPlayer):
             return True
     return False
 
+def newCheckWin(values):
+  for i in (g.width):
+    for j in (g.width):
+      if (values[i][j].firstPriority >= g.n):
+            return True
+  return False
+
 def make_move(board, combinations, playerCombinations, values, playerValues, curPlayer, move):
     if (curPlayer):
         board[move.x][move.y] = 1
@@ -46,11 +53,11 @@ def updateValues(board, combinations, values, curPlayer):
   highest = 0
   for i in range(len(combinations)):
     for j in range(len(combinations[i])):
-        #If AI is black
+      if (curPlayer):
         if (board[combinations[i][j].x][combinations[i][j].y] == 1):
           temp += 1
-        elif (board[combinations[i][j].x][combinations[i][j].y] == 2):
-          temp += 1
+      elif (board[combinations[i][j].x][combinations[i][j].y] == 2):
+        temp += 1
     for j in range(len(combinations[i])):
       if (values[combinations[i][j].x][combinations[i][j].y].firstPriority < temp):
         values[combinations[i][j].x][combinations[i][j].y].firstPriority = temp
@@ -61,14 +68,18 @@ def updateValues(board, combinations, values, curPlayer):
 
   #Populate Second Priority.  Check if a single combo has a value in it that contains a combination
   #of the highest first priority.  For every node in that combo, increment it's second potential by 1.
+  temp = highest
   for i in range(len(combinations)): 
     for j in range(len(combinations[i])): 
-      if (board[combinations[i][j].x][combinations[i][j].y] == 1 and values[combinations[i][j].x][combinations[i][j].y].firstPriority == highest):
-        for k in range(len(combinations[i])):
-          values[combinations[i][k].x][combinations[i][k].y].secondPriority += 1
+      if (curPlayer):
+        if (board[combinations[i][j].x][combinations[i][j].y] == 1 and values[combinations[i][j].x][combinations[i][j].y].firstPriority == highest):
+          temp -= 1
       elif (board[combinations[i][j].x][combinations[i][j].y] == 2 and values[combinations[i][j].x][combinations[i][j].y].firstPriority == highest):
-        for k in range(len(combinations[i])):
-          values[combinations[i][k].x][combinations[i][k].y].secondPriority += 1
+        temp -= 1
+    if (temp == 0):
+      for j in range(len(combinations[i])):
+        values[combinations[i][j].x][combinations[i][j].y].secondPriority += 1
+    temp = highest
 
 
 def removePotential(combinations, values, newCoordinate):
@@ -148,6 +159,7 @@ def copy2DValue(origin, copy):
   for i in range(len(origin)):
     for j in range(len(origin[i])):
         copy[i][j] = c.Value(origin[i][j].firstPriority, origin[i][j].secondPriority, origin[i][j].thirdPriority)
+
 def drawBoard(board):
     print("   ", end='')
     for i in range(g.width):
@@ -182,3 +194,15 @@ def drawBoard(board):
         for j in range(g.width):
             print("----", end='')
         print("")
+
+def drawPotential(values):
+  s = ""
+
+  for i in range(g.width):
+    for j in range(g.width):
+      s += "("
+      s += str(values[i][j].firstPriority) + "," + str(values[i][j].secondPriority) + "," + str(values[i][j].thirdPriority)
+      s += ") "
+    
+    print(s)
+    s = ""
