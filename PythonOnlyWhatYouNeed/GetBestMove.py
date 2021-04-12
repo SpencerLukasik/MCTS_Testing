@@ -3,6 +3,7 @@ import Globals as g
 import Classes as c
 import Functions as func
 import MCTS as MCTS
+import random
 
 #Runs a Monty-Carlo search using the moves it finds off of getBestMovesInAnArray
 #A Little slow, but accurate
@@ -248,11 +249,10 @@ def getBestMovesInAnArrayFast(board, values, playerValues, combinations, playerC
                 if (values[j][i].thirdPriority > -1):
                     if (values[j][i].firstPriority + playerValues[j][i].firstPriority == highestFirstTotal and values[j][i].secondPriority + playerValues[j][i].secondPriority >= highestSecondTotal):
                         possibleMoves.append(c.CoordinatePair(j, i))
-    LIMITOR = 3
-    if (len(possibleMoves) > LIMITOR):
-        possibleMoves.sort(key=lambda x: values[x.x][x.y].thirdPriority, reverse=True)[LIMITOR*-1:]
-
-    print(f"This list's size is {len(possibleMoves)}")
+    if (True):
+        LIMITOR = 3
+        while (len(possibleMoves) > LIMITOR):
+            possibleMoves.remove(random.choice(possibleMoves))
     return possibleMoves
 
 #Fixes combinations and values based on the given board
