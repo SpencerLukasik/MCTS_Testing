@@ -39,7 +39,7 @@ def MCTS_Move(board, combinations, values, playerCombinations, playerValues, cur
         func.copyCombination(combinations, simCombinations)
         func.copyCombination(playerCombinations, simPlayerCombinations)
         simCurPlayer.value = curPlayer
-        simUntaken = trial.getBestMovesInAnArrayFast(simBoard, simValues, simPlayerValues, simCombinations, simPlayerCombinations)
+        simUntaken = trial.getBestMovesInAnArrayFast(simBoard, simValues, simPlayerValues, simCombinations, simPlayerCombinations, simCurPlayer.value)
         #Selection and Expansion of Node Tree
         start = SelectAndExpand(head, simUntaken, simBoard, simValues, simPlayerValues, simCombinations, simPlayerCombinations, simCurPlayer)
         #Simulate Game is Simulation
@@ -69,8 +69,8 @@ def simulateGame(simBoard, combinations, playerCombinations, values, playerValue
         buff *= -1
     #While there is space on the board,
     while (len(simUntaken) > 0):
-        #func.drawBoard(simBoard)
-        #input()
+        func.drawBoard(simBoard)
+        input()
         #If the current player is the human,
         if (curPlayer.value):
             #Set the board space to 1
@@ -81,8 +81,8 @@ def simulateGame(simBoard, combinations, playerCombinations, values, playerValue
             playerValues[randoMove.x][randoMove.y].thirdPriority = -1
             #If there is a win with this player, return -1
             if (func.checkWin(simBoard, playerCombinations, curPlayer.value)):
-                #print("This was a loss")
-                #func.drawBoard(simBoard)
+                print("This was a loss")
+                func.drawBoard(simBoard)
                 return (-1 * buff)
         else:
             simBoard[randoMove.x][randoMove.y] = 2
@@ -92,8 +92,8 @@ def simulateGame(simBoard, combinations, playerCombinations, values, playerValue
             playerValues[randoMove.x][randoMove.y].thirdPriority = -1
             #Return 1 for a positive outcome
             if (func.checkWin(simBoard, combinations, curPlayer.value)):
-                #print("This was a win")
-                #func.drawBoard(simBoard)
+                print("This was a win")
+                func.drawBoard(simBoard)
                 return (1 * buff)
 
     #Remove the untaken space from the list so spaces are not repeated
@@ -101,17 +101,17 @@ def simulateGame(simBoard, combinations, playerCombinations, values, playerValue
     #**than a Coordinate Pair itself, but it does look ugly
         curPlayer.value = not curPlayer.value
         if (curPlayer.value):
-            simUntaken = trial.getBestMovesInAnArrayFast(simBoard, playerValues, values, playerCombinations, combinations)
+            simUntaken = trial.getBestMovesInAnArrayFast(simBoard, playerValues, values, playerCombinations, combinations, curPlayer.value)
         else:
-            simUntaken = trial.getBestMovesInAnArrayFast(simBoard, values, playerValues, combinations, playerCombinations)
+            simUntaken = trial.getBestMovesInAnArrayFast(simBoard, values, playerValues, combinations, playerCombinations, curPlayer.value)
 
     #Get another random untaken space
         if (len(simUntaken) > 0):
             randoMove = random.choice(simUntaken)
 
     #Return 0 if it's a catgame
-    #print("This was a tie")
-    #func.drawBoard(simBoard)
+    print("This was a tie")
+    func.drawBoard(simBoard)
     return 0
 
 

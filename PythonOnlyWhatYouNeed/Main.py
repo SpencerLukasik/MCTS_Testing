@@ -33,8 +33,8 @@ def GameLoop(board, values, playerValues, combinations, playerCombinations, prev
         else:
             #MCTS move
             
-            prevCoordinates = random.choice(trial.getBestMovesInAnArray(board))
-            #prevCoordinates = trial.getMCTS_Move(board)
+            #prevCoordinates = random.choice(trial.getBestMovesInAnArray(board))
+            prevCoordinates = trial.getMCTS_Move(board)
 
             func.make_move(board, combinations, playerCombinations, values, playerValues, curPlayer, prevCoordinates)
             if (func.checkWin(board, combinations, curPlayer)):

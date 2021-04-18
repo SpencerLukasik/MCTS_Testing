@@ -26,6 +26,18 @@ def newCheckWin(values):
             return True
   return False
 
+def drawPotential(values):
+  s = ""
+
+  for i in range(g.width):
+    for j in range(g.width):
+      s += "("
+      s += str(values[i][j].firstPriority) + "," + str(values[i][j].secondPriority) + "," + str(values[i][j].thirdPriority)
+      s += ") "
+    
+  print(s)
+  s = ""
+
 def make_move(board, combinations, playerCombinations, values, playerValues, curPlayer, move):
     if (curPlayer):
         board[move.x][move.y] = 1

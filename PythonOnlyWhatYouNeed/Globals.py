@@ -8,6 +8,6 @@ numberOfSimulations = 100
 #If you want to make generally tighter, less exploratory moves, decrease these variables.
 
 #Max allowed variance of the First Priority.  Should probably not make this variable than 2
-FIRST_VARIANCE = 1
+FIRST_VARIANCE = 0
 #Max allowed variance of the Second Priority.  
 SECOND_VARIANCE = 2

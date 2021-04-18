@@ -192,9 +192,11 @@ def getBestMovesInAnArray(board):
 #Does the same as the previous, but doesn't have to re-copy the combinations and values
 #Only useful for the MCTS_Searching
 #Don't touch this
-def getBestMovesInAnArrayFast(board, values, playerValues, combinations, playerCombinations):
-    func.updateValues(board, combinations, values, False)
-    func.updateValues(board, playerCombinations, playerValues, True)
+def getBestMovesInAnArrayFast(board, values, playerValues, combinations, playerCombinations, curPlayer):
+    func.updateValues(board, combinations, values, curPlayer)
+    func.updateValues(board, playerCombinations, playerValues, not curPlayer)
+
+    func.drawPotential(values)
 
     possibleMoves = []
 
