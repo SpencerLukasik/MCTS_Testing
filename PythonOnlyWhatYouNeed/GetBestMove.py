@@ -196,8 +196,6 @@ def getBestMovesInAnArrayFast(board, values, playerValues, combinations, playerC
     func.updateValues(board, combinations, values, curPlayer)
     func.updateValues(board, playerCombinations, playerValues, not curPlayer)
 
-    func.drawPotential(values)
-
     possibleMoves = []
 
     highestFirstAggressive = 0

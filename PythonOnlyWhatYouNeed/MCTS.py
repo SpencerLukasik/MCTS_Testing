@@ -69,8 +69,8 @@ def simulateGame(simBoard, combinations, playerCombinations, values, playerValue
         buff *= -1
     #While there is space on the board,
     while (len(simUntaken) > 0):
-        func.drawBoard(simBoard)
-        input()
+        #func.drawBoard(simBoard)
+        #input()
         #If the current player is the human,
         if (curPlayer.value):
             #Set the board space to 1
@@ -81,8 +81,8 @@ def simulateGame(simBoard, combinations, playerCombinations, values, playerValue
             playerValues[randoMove.x][randoMove.y].thirdPriority = -1
             #If there is a win with this player, return -1
             if (func.checkWin(simBoard, playerCombinations, curPlayer.value)):
-                print("This was a loss")
-                func.drawBoard(simBoard)
+                #print("This was a loss")
+                #func.drawBoard(simBoard)
                 return (-1 * buff)
         else:
             simBoard[randoMove.x][randoMove.y] = 2
@@ -92,8 +92,8 @@ def simulateGame(simBoard, combinations, playerCombinations, values, playerValue
             playerValues[randoMove.x][randoMove.y].thirdPriority = -1
             #Return 1 for a positive outcome
             if (func.checkWin(simBoard, combinations, curPlayer.value)):
-                print("This was a win")
-                func.drawBoard(simBoard)
+                #print("This was a win")
+                #func.drawBoard(simBoard)
                 return (1 * buff)
 
     #Remove the untaken space from the list so spaces are not repeated
@@ -110,8 +110,8 @@ def simulateGame(simBoard, combinations, playerCombinations, values, playerValue
             randoMove = random.choice(simUntaken)
 
     #Return 0 if it's a catgame
-    print("This was a tie")
-    func.drawBoard(simBoard)
+    #print("This was a tie")
+    #func.drawBoard(simBoard)
     return 0
 
 
