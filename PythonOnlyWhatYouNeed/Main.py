@@ -28,12 +28,6 @@ def GameLoop(board, values, playerValues, combinations, playerCombinations, prev
             if (func.checkWin(board, playerCombinations, curPlayer)):
                 break
             curPlayer = not curPlayer
-            print("AI:")
-            func.updateValues(board, combinations, values, False);
-            func.drawPotential(values);
-            print("Player:")
-            func.updateValues(board, playerCombinations, playerValues, True);
-            func.drawPotential(playerValues);
 
 
         #If it's the AI's turn

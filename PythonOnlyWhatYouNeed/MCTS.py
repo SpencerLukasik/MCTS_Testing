@@ -22,11 +22,11 @@ def MCTS_Move(board, combinations, values, playerCombinations, playerValues, cur
 
     #Create a list of all untaken spaces
     untaken = trial.getBestMovesInAnArrayFast(board, values, playerValues, combinations, playerCombinations, simCurPlayer.value)
-    print(len(untaken))
+    #print(len(untaken))
 
     #Run simulations according to the number of simulations required
     for i in range(g.numberOfSimulations):
-        print(f"Simulation #{i}!")
+        #print(f"Simulation #{i}!")
         #Copy simulated values
         func.copy2DList(board, simBoard)
         func.copy2DValue(values, simValues)
