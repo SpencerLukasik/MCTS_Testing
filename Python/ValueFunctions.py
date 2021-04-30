@@ -142,3 +142,23 @@ def copy2DValue(origin, copy):
   for i in range(len(origin)):
     for j in range(len(origin[i])):
         copy[i][j] = c.Value(origin[i][j].firstPriority, origin[i][j].secondPriority, origin[i][j].thirdPriority)
+
+def temp()
+{
+  if (highest == 0):
+        return;
+  
+  numOfSpotsTaken = 0
+  for i in range(len(combinations)): 
+    for j in range(len(combinations[i])): 
+      if (curPlayer):
+        if (board[combinations[i][j].x][combinations[i][j].y] == 1 and values[combinations[i][j].x][combinations[i][j].y].firstPriority == highest):
+          numOfSpotsTaken += 1
+      elif (board[combinations[i][j].x][combinations[i][j].y] == 2 and values[combinations[i][j].x][combinations[i][j].y].firstPriority == highest):
+        numOfSpotsTaken += 1
+
+    for j in range(len(combinations[i])):
+      if (values[combinations[i][j].x][combinations[i][j].y].firstPriority == numOfSpotsTaken):
+        values[combinations[i][j].x][combinations[i][j].y].secondPriority += 1
+    numOfSpotsTaken = 0
+}

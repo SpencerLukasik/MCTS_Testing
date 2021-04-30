@@ -20,20 +20,27 @@ def GameLoop(board, values, playerValues, combinations, playerCombinations, prev
         if (curPlayer):
             func.drawBoard(board)
             
-            prevCoordinates.y = int(input("X: "), 10)
-            prevCoordinates.x = int(input("Y: "), 10)
+            
+            prevCoordinates.y = int(input("X: "))
+            prevCoordinates.x = int(input("Y: "))
 
             func.make_move(board, combinations, playerCombinations, values, playerValues, curPlayer, prevCoordinates)
             if (func.checkWin(board, playerCombinations, curPlayer)):
                 break
             curPlayer = not curPlayer
+            print("AI:")
+            func.updateValues(board, combinations, values, False);
+            func.drawPotential(values);
+            print("Player:")
+            func.updateValues(board, playerCombinations, playerValues, True);
+            func.drawPotential(playerValues);
 
 
         #If it's the AI's turn
         else:
             #MCTS move
             
-            #prevCoordinates = random.choice(trial.getBestMovesInAnArray(board))
+            #prevCoordinates = random.choice(trial.getBestMovesInAnArrayFast(board, values, playerValues, combinations, playerCombinations, curPlayer))
             prevCoordinates = trial.getMCTS_Move(board)
 
             func.make_move(board, combinations, playerCombinations, values, playerValues, curPlayer, prevCoordinates)

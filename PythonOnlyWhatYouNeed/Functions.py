@@ -81,17 +81,22 @@ def updateValues(board, combinations, values, curPlayer):
   #Populate Second Priority.  Check if a single combo has a value in it that contains a combination
   #of the highest first priority.  For every node in that combo, increment it's second potential by 1.
   temp = highest
+  if (highest == 0):
+        return;
+  
+  numOfSpotsTaken = 0
   for i in range(len(combinations)): 
     for j in range(len(combinations[i])): 
       if (curPlayer):
-        if (board[combinations[i][j].x][combinations[i][j].y] == 1 and values[combinations[i][j].x][combinations[i][j].y].firstPriority == highest):
-          temp -= 1
-      elif (board[combinations[i][j].x][combinations[i][j].y] == 2 and values[combinations[i][j].x][combinations[i][j].y].firstPriority == highest):
-        temp -= 1
-    if (temp == 0):
-      for j in range(len(combinations[i])):
+        if (board[combinations[i][j].x][combinations[i][j].y] == 1):
+          numOfSpotsTaken += 1
+      elif (board[combinations[i][j].x][combinations[i][j].y] == 2):
+        numOfSpotsTaken += 1
+
+    for j in range(len(combinations[i])):
+      if (values[combinations[i][j].x][combinations[i][j].y].firstPriority == numOfSpotsTaken):
         values[combinations[i][j].x][combinations[i][j].y].secondPriority += 1
-    temp = highest
+    numOfSpotsTaken = 0
 
 
 def removePotential(combinations, values, newCoordinate):

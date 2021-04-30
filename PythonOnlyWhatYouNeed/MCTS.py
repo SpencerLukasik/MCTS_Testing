@@ -21,11 +21,8 @@ def MCTS_Move(board, combinations, values, playerCombinations, playerValues, cur
     simCurPlayer = c.Boolean(curPlayer)
 
     #Create a list of all untaken spaces
-    untaken = []
-    for i in range(g.width):
-        for j in range(g.width):
-            if (board[i][j] == 0):
-                untaken.append(c.CoordinatePair(i, j))
+    untaken = trial.getBestMovesInAnArrayFast(board, values, playerValues, combinations, playerCombinations, simCurPlayer.value)
+    print(len(untaken))
 
     #Run simulations according to the number of simulations required
     for i in range(g.numberOfSimulations):
@@ -39,7 +36,7 @@ def MCTS_Move(board, combinations, values, playerCombinations, playerValues, cur
         func.copyCombination(combinations, simCombinations)
         func.copyCombination(playerCombinations, simPlayerCombinations)
         simCurPlayer.value = curPlayer
-        simUntaken = trial.getBestMovesInAnArrayFast(simBoard, simValues, simPlayerValues, simCombinations, simPlayerCombinations, simCurPlayer.value)
+        simUntaken = untaken.copy()
         #Selection and Expansion of Node Tree
         start = SelectAndExpand(head, simUntaken, simBoard, simValues, simPlayerValues, simCombinations, simPlayerCombinations, simCurPlayer)
         #Simulate Game is Simulation
@@ -48,8 +45,8 @@ def MCTS_Move(board, combinations, values, playerCombinations, playerValues, cur
         downPropegate(head)
 
     #Prints out final values.  Commend out if you don't want to see them
-    #for i in range(len(head.children)):
-        #print(f"Child ({head.children[i].coordinates.y}, {head.children[i].coordinates.x}) was visited {head.children[i].visited} times, had a score of {head.children[i].score} and had a uct of {head.children[i].uct}")
+    for i in range(len(head.children)):
+        print(f"Child ({head.children[i].coordinates.y}, {head.children[i].coordinates.x}) was visited {head.children[i].visited} times, had a score of {head.children[i].score} and had a uct of {head.children[i].uct}")
   
    
     #Get the highest scoring node and return it back to main
@@ -104,7 +101,7 @@ def simulateGame(simBoard, combinations, playerCombinations, values, playerValue
             simUntaken = trial.getBestMovesInAnArrayFast(simBoard, playerValues, values, playerCombinations, combinations, curPlayer.value)
         else:
             simUntaken = trial.getBestMovesInAnArrayFast(simBoard, values, playerValues, combinations, playerCombinations, curPlayer.value)
-
+        #simUntaken.remove(randoMove)
     #Get another random untaken space
         if (len(simUntaken) > 0):
             randoMove = random.choice(simUntaken)

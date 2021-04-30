@@ -195,6 +195,10 @@ def getBestMovesInAnArray(board):
 def getBestMovesInAnArrayFast(board, values, playerValues, combinations, playerCombinations, curPlayer):
     func.updateValues(board, combinations, values, curPlayer)
     func.updateValues(board, playerCombinations, playerValues, not curPlayer)
+    #print("AI:")
+    #func.drawPotential(values)
+    #print("Player:")
+    #func.drawPotential(playerValues)
 
     possibleMoves = []
 
@@ -260,6 +264,17 @@ def getBestMovesInAnArrayFast(board, values, playerValues, combinations, playerC
                 if (values[j][i].thirdPriority > -1):
                     if (values[j][i].firstPriority + playerValues[j][i].firstPriority >= (highestFirstTotal-g.FIRST_VARIANCE) and values[j][i].secondPriority + playerValues[j][i].secondPriority >= (highestSecondTotal-g.SECOND_VARIANCE)):
                         possibleMoves.append(c.CoordinatePair(j, i))
+        #print("AI:")
+        #print(highestFirstAggressive)
+        #print(highestSecondAggressive)
+        #print("Player:")
+        #print(highestFirstDefensive)
+        #print(highestSecondDefensive)
+        #print("Total:")
+        #print(highestFirstTotal)
+        #print(highestSecondTotal)
+        #print("Possible Moves Size:")
+        #print(len(possibleMoves))
     
     return possibleMoves
 

@@ -1,7 +1,7 @@
 #Variables to alter game
-width = 11
+width = 19
 n = 5
-numberOfSimulations = 100
+numberOfSimulations = 50
 
 #Variance identifies the max range of possible moves the game can explore.
 #If you want it to make less value-centric moves and focus instead on exploring, increase these variables.
@@ -10,4 +10,4 @@ numberOfSimulations = 100
 #Max allowed variance of the First Priority.  Should probably not make this variable than 2
 FIRST_VARIANCE = 0
 #Max allowed variance of the Second Priority.  
-SECOND_VARIANCE = 2
+SECOND_VARIANCE = 0

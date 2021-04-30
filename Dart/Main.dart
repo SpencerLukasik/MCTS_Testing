@@ -1,13 +1,16 @@
 import 'classes.dart';
 import 'ClassicGame.dart';
-import 'ValueFunctions.dart';
+import 'Functions.dart';
+import 'dart:io';
 import 'MCTS.dart';
+import 'dart:math';
 
 //Change these values to alter the game
-const int width = 3;
-const int n = 3;
+const int width = 19;
+const int n = 5;
 const int numberOfSimulations = 1000;
-const bool playAgainstMCTS = false;
+const bool playingAgainstMCTS = true;
+List<CoordinatePair> possibleMoves = [];
 
 void main() {
   //Current player; true is human
@@ -28,11 +31,37 @@ void main() {
   populate(combinations, values);
   populate(playerCombinations, playerValues);
 
-  if (playAgainstMCTS) {
-    MCTS_GameLoop(board, values, playerValues, combinations, playerCombinations,
-        prevCoordinates, numberOfSimulations, curPlayer);
-  } else {
-    GameLoop(board, values, playerValues, combinations, playerCombinations,
-        prevCoordinates, curPlayer);
+  while (true) {
+    if (curPlayer) {
+      drawBoard(board);
+      print("X: ");
+      prevCoordinates.y = int.parse(stdin.readLineSync());
+      print("Y: ");
+      prevCoordinates.x = int.parse(stdin.readLineSync());
+
+      makeMove(board, combinations, playerCombinations, values, playerValues,
+          curPlayer, prevCoordinates);
+      if (checkWin(board, playerCombinations, curPlayer)) break;
+      curPlayer = !curPlayer;
+    } else {
+      if (playingAgainstMCTS)
+        prevCoordinates = MCTS_Move(board, combinations, values,
+            playerCombinations, playerValues, curPlayer);
+      else {
+        possibleMoves = getBestMovesInAnArrayFast(board, values, playerValues,
+            combinations, playerCombinations, curPlayer);
+        prevCoordinates = possibleMoves[Random().nextInt(possibleMoves.length)];
+      }
+      makeMove(board, combinations, playerCombinations, values, playerValues,
+          curPlayer, prevCoordinates);
+      if (checkWin(board, combinations, curPlayer)) break;
+      curPlayer = !curPlayer;
+    }
   }
+
+  drawBoard(board);
+  if (curPlayer)
+    print("Congratulations to the Human!");
+  else
+    print("Congratulations to the AI!");
 }
